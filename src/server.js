@@ -1,12 +1,14 @@
 const path = require('node:path');
+const fs = require('node:fs');
 const express = require('express');
 const tasks = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const clientDist = path.join(__dirname, '..', 'client', 'dist');
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(clientDist));
 
 app.get('/api/tasks', (req, res) => {
   res.json(tasks.list());
@@ -46,4 +48,7 @@ app.delete('/api/tasks/:id', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+  if (!fs.existsSync(clientDist)) {
+    console.log('Front end not built yet - run "npm run build" to serve it here.');
+  }
 });
