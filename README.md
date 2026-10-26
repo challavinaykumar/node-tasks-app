@@ -1,45 +1,42 @@
-# node-tasks-app
+# node-tasks-app (backend)
 
-A small task manager built with **Node.js**, **Express**, **SQLite** (SQL) and a
-**React** front end (Vite).
+REST API for the tasks app, built with **Node.js**, **Express** and **SQLite**.
 SQLite is built into Node 22.13+, so there is no database server to install —
 data is saved to `data/tasks.db`.
+
+The front end lives in a separate repository: [node-tasks-frontend](https://github.com/challavinaykumar/node-tasks-frontend).
 
 ## Run
 
 ```
 npm install
-npm run build
 npm start
 ```
 
-Open http://localhost:3000. `npm run build` installs and builds the front end
-in `client/`; Express then serves it together with the API.
+The API runs at http://localhost:3000. Use `npm run dev` to restart
+automatically when you edit code.
 
-## Develop
+## Settings
 
-Run the API and the front end in two terminals:
+Set these as environment variables (see `.env.example`):
+
+| Variable      | Default                                         | Purpose                                  |
+|---------------|-------------------------------------------------|------------------------------------------|
+| `PORT`        | `3000`                                          | Port the API listens on                  |
+| `CORS_ORIGIN` | `http://localhost:5173,http://localhost:4173`   | Front-end addresses allowed to call it   |
+| `DB_FILE`     | `data/tasks.db`                                 | SQLite database file                     |
+
+Windows cmd example:
 
 ```
-npm run dev
-npm run dev:client
+set CORS_ORIGIN=http://localhost:8080 && npm start
 ```
-
-Open http://localhost:5173. The React app reloads instantly when you edit
-files in `client/src`, and API calls are forwarded to the Express server on
-port 3000.
-
-## Front end features
-
-- Add, complete and delete tasks
-- Filter by All / Active / Done with counts
-- Click a task to open its details in a side panel and edit the title or status
-- Light and dark mode (follows your system setting)
 
 ## API
 
 | Method | URL              | Body                              | Description       |
 |--------|------------------|-----------------------------------|-------------------|
+| GET    | /api/health      |                                   | Health check      |
 | GET    | /api/tasks       |                                   | List all tasks    |
 | GET    | /api/tasks/:id   |                                   | Get one task      |
 | POST   | /api/tasks       | `{ "title": "Buy milk" }`         | Create a task     |
@@ -53,21 +50,17 @@ curl -X POST http://localhost:3000/api/tasks -H "Content-Type: application/json"
 curl http://localhost:3000/api/tasks
 ```
 
-## Run with Docker
+## Docker
 
 ```
 docker build -t node-tasks-app .
-docker run -p 3000:3000 -v tasks-data:/app/data node-tasks-app
+docker run -p 3000:3000 -e CORS_ORIGIN=http://localhost:8080 -v tasks-data:/app/data node-tasks-app
 ```
 
 ## Project layout
 
 ```
-src/server.js          Express app, REST routes, serves the built front end
-src/db.js              SQLite connection, table setup and queries
-client/src/App.jsx     Task list, add form and filters
-client/src/TaskPanel.jsx  Side panel for viewing and editing a task
-client/src/api.js      Calls to the REST API
-client/src/App.css     Styles
-data/tasks.db          Database file (created on first run)
+src/server.js   Express app and REST routes
+src/db.js       SQLite connection, table setup and queries
+data/tasks.db   Database file (created on first run)
 ```

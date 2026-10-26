@@ -1,14 +1,20 @@
-const path = require('node:path');
-const fs = require('node:fs');
 const express = require('express');
+const cors = require('cors');
 const tasks = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const clientDist = path.join(__dirname, '..', 'client', 'dist');
+// Front-end addresses allowed to call this API (comma-separated)
+const CORS_ORIGIN = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:4173')
+  .split(',')
+  .map((origin) => origin.trim());
 
+app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json());
-app.use(express.static(clientDist));
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 app.get('/api/tasks', (req, res) => {
   res.json(tasks.list());
@@ -47,8 +53,6 @@ app.delete('/api/tasks/:id', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  if (!fs.existsSync(clientDist)) {
-    console.log('Front end not built yet - run "npm run build" to serve it here.');
-  }
+  console.log(`API running at http://localhost:${PORT}`);
+  console.log(`Allowing requests from: ${CORS_ORIGIN.join(', ')}`);
 });

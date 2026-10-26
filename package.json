@@ -1,19 +1,18 @@
 {
   "name": "node-tasks-app",
   "version": "1.0.0",
-  "description": "Small Node.js + Express + SQLite task manager with a React front end",
+  "description": "Tasks REST API built with Node.js, Express and SQLite",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
-    "build": "npm --prefix client install && npm --prefix client run build",
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "dev:client": "npm --prefix client run dev"
+    "dev": "node --watch src/server.js"
   },
   "engines": {
     "node": ">=22.13"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.1.0"
   }
 }
