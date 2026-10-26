@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f4f5f7; margin: 0; padding: 40px 16px; color: #1f2328; }
+    main { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    h1 { margin: 0 0 16px; font-size: 22px; }
+    form { display: flex; gap: 8px; margin-bottom: 16px; }
+    input[type=text] { flex: 1; padding: 10px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 15px; }
+    button { padding: 10px 14px; border: 0; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; font-size: 14px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #eaeef2; }
+    li span { flex: 1; }
+    li.done span { text-decoration: line-through; color: #8c959f; }
+    li button { background: transparent; color: #cf222e; padding: 4px 8px; }
+    .empty { color: #8c959f; text-align: center; padding: 16px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Tasks</h1>
+    <form id="add">
+      <input type="text" id="title" placeholder="What needs doing?" required>
+      <button type="submit">Add</button>
+    </form>
+    <ul id="list"></ul>
+  </main>
+
+  <script>
+    const list = document.getElementById('list');
+    const api = (url, opts = {}) =>
+      fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+
+    async function load() {
+      const tasks = await (await api('/api/tasks')).json();
+      list.innerHTML = tasks.length ? '' : '<li class="empty">No tasks yet</li>';
+      for (const t of tasks) {
+        const li = document.createElement('li');
+        li.className = t.done ? 'done' : '';
+        li.innerHTML = '<input type="checkbox"><span></span><button title="Delete">✕</button>';
+        li.querySelector('span').textContent = t.title;
+        const box = li.querySelector('input');
+        box.checked = t.done;
+        box.onchange = async () => {
+          await api(`/api/tasks/${t.id}`, { method: 'PUT', body: JSON.stringify({ done: box.checked }) });
+          load();
+        };
+        li.querySelector('button').onclick = async () => {
+          await api(`/api/tasks/${t.id}`, { method: 'DELETE' });
+          load();
+        };
+        list.appendChild(li);
+      }
+    }
+
+    document.getElementById('add').onsubmit = async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('title');
+      await api('/api/tasks', { method: 'POST', body: JSON.stringify({ title: input.value }) });
+      input.value = '';
+      load();
+    };
+
+    load();
+  </script>
+</body>
+</html>
